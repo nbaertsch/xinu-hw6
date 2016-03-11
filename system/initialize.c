@@ -50,7 +50,6 @@ void nulluser(void)
 
     /* Call the main program */
     ready(create((void *)main, INITSTK, 1, "MAIN", 2, 0, NULL), 0);
-
     /* enable interrupts here */
     enable();
 
@@ -117,6 +116,7 @@ static int sysinit(void)
 {
     int i = 0;
     pcb *ppcb = NULL;           /* process control block pointer */
+    semblk *psem = NULL;        /* semaphore block pointer       */
 
     /* Initialize system variables */
     /* Count this NULLPROC as the first process in the system. */
@@ -135,13 +135,25 @@ static int sysinit(void)
     ppcb->stkbase = (void *)&_end;
     ppcb->regs[PREG_SP] = NULL;
     ppcb->stklen = (ulong)memheap - (ulong)&_end;
-
-    /* TODO: This line won't compile properly until you have added
-     * a priority field to the process control block.
-     */
     ppcb->priority = 0;
-
+    /* TODO: This line won't compile properly until you have added
+     * a semaphore field to the process control block.
+     */
+    ppcb->sem = EMPTY;
     currpid = NULLPROC;
+
+    /* Initialize semaphores */
+    for (i = 0; i < NSEM; i++)
+    {
+        psem = &semtab[i];
+        psem->state = SFREE;
+        psem->count = 0;
+        psem->queue = newqueue();
+    }
+
+    /* initialize bounded-waiting mutex subsystems */
+    mutexInit();
+
 
     /* initialize process ready list */
     readylist = newqueue();

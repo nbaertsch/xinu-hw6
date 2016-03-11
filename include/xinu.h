@@ -4,6 +4,8 @@
 #include <arm.h>
 #include <proc.h>
 #include <queue.h>
+#include <semaphore.h>
+#include <mutex.h>
 #include <memory.h>
 #include <tlb.h>
 #include <compiler.h>

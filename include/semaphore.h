@@ -1,13 +1,12 @@
 /**
  * @file semaphore.h
+ * @provides isbadsem.
  *
  */
-/* Embedded Xinu, Copyright (C) 2009.  All rights reserved. */
+/* Embedded Xinu, Copyright (C) 2008.  All rights reserved. */
 
 #ifndef _SEMAPHORE_H_
 #define _SEMAPHORE_H_
-
-#include <queue.h>
 
 /* Semaphore state definitions */
 #define SFREE 0x01 /**< this semaphore is free */
@@ -19,14 +18,14 @@ typedef unsigned int semaphore;
 /**
  * Semaphore table entry
  */
-struct sement                   /* semaphore table entry      */
+typedef struct sement           /* semaphore table entry      */
 {
     char state;                 /**< the state SFREE or SUSED */
     int count;                  /**< count for this semaphore */
     qid_typ queue;              /**< requires queue.h.        */
-};
+} semblk;
 
-extern struct sement semtab[];
+extern semblk semtab[];
 
 /* isbadsem - check validity of reqested semaphore id and state */
 #define isbadsem(s) ((s >= NSEM) || (SFREE == semtab[s].state))

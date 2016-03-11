@@ -9,28 +9,97 @@
  * and
  *
  */
-/* Embedded XINU, Copyright (C) 2007.  All rights reserved. */
+/* Embedded XINU, Copyright (C) 2010, 2014.  All rights reserved. */
 
 #include <xinu.h>
 
-
-void bigargs(int a, int b, int c, int d, int e, int f)
+ulong rand(void)
 {
-    kprintf(" bigargs(%d, %d, %d, %d, %d, %d) == %d\r\n",
-            a, b, c, d, e, f, a + b + c + d + e + f);
+    ulong a = 1664525UL;
+    ulong b = 1013904223UL;
+    static ulong c = 0;
+
+    c = a * c + b;
+    return c;
 }
 
-void printpid(int times)
+syscall sleep(int time)
 {
-    int i = 0;
+    /* Dumbest sleep ever. */
+    int i = 0, j = 0;
+    for (i = 0; i < time; i++)
+        for (j = 0; j < 1000; j++)
+            ;
+    return 0;
+}
 
+/* BEGIN Textbook code from Ch 5 Programming Project 3, Silberschatz p. 254 */
+typedef int buffer_item;
+#define BUFFER_SIZE 5
+
+struct boundedbuffer
+{
+    buffer_item buffer[BUFFER_SIZE];
+    int bufferhead;
+    int buffertail;
+
+    semaphore empty;
+    semaphore full;
+    semaphore mutex;
+};
+
+int insert_item(struct boundedbuffer *bb, buffer_item item)
+{
+    // TODO:
+    /* insert item into buffer
+     * return 0 if successful, otherwise
+     * return SYSERR indicating an error condition */
+    return 0;
+}
+
+int remove_item(struct boundedbuffer *bb, buffer_item * item)
+{
+    // TODO:
+    /* remove an object from buffer
+     * placing it in item
+     * return 0 if successful, otherwise
+     * return SYSERR indicating an error condition */
+    return 0;
+}
+
+void producer(struct boundedbuffer *bb)
+{
+    buffer_item item;
     enable();
-    for (i = 0; i < times; i++)
+    while (1)
     {
-        kprintf("This is process %d\r\n", currpid);
-        resched();
+        /* sleep for a random period of time */
+        sleep(rand() % 100);
+        /* generate a random number */
+        item = rand();
+        if (insert_item(bb, item))
+            kprintf("report error condition\r\n");
+        else
+            kprintf("producer %d produced %d\r\n", currpid, item);
     }
 }
+
+void consumer(struct boundedbuffer *bb)
+{
+    buffer_item item;
+    enable();
+    while (1)
+    {
+        /* sleep for a random period of time */
+        sleep(rand() % 100);
+        if (remove_item(bb, &item))
+            kprintf("report error condition\r\n");
+        else
+            kprintf("consumer %d consumed %d\r\n", currpid, item);
+    }
+}
+
+/* END Textbook code from Ch 5 Programming Project 3, Silberschatz p. 254 */
 
 /**
  * testcases - called after initialization completes to test things.
@@ -38,11 +107,11 @@ void printpid(int times)
 void testcases(void)
 {
     int c;
+    struct boundedbuffer bbuff;
 
-    kprintf("===TEST BEGIN===\r\n");
+    kprintf("0) Test 1 producer, 1 consumer, same priority\r\n");
 
-    kprintf("0) Test priority scheduling\r\n");
-
+    kprintf("===TEST BEGIN===");
 
     // TODO: Test your operating system!
 
@@ -50,18 +119,9 @@ void testcases(void)
     switch (c)
     {
     case '0':
-    	kprintf("Readying PRINTER-A\r\n");
-        ready(create((void *)printpid, INITSTK, 2, "PRINTER-A", 1, 5), 0);
-        kprintf("Readying PRINTER-B\r\n");
-        ready(create((void *)printpid, INITSTK, 5, "PRINTER-B", 1, 5), 0);
-        kprintf("Readying PRINTER-C\r\n");
-        ready(create((void *)printpid, INITSTK, 10, "PRINTER-C", 1, 5), 0);
-        kprintf("Readying PRINTER-D\r\n");
-        ready(create((void *)printpid, INITSTK, 5, "PRINTER-D", 1, 5), 0);
-        kprintf("Readying BIGARGS\r\n");
-        ready(create
-              ((void *)bigargs, INITSTK, 20, "BIGARGS", 6, 10, 20, 30, 40,
-               50, 60), 0);
+        // TODO:
+        // Initialize bbuff, and create producer and consumer processes
+
         break;
 
     default:
